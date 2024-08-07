@@ -1,0 +1,39 @@
+{
+  "reports": [
+    {
+      "migration": {
+        "applied": false,
+        "fileName": "20240801151448_hr_employee_table.sql",
+        "filePath": "/home/dbUser/myRepo/migrations/20240801151448_hr_employee_table.sql",
+        "relativeFilePath": "20240801151448_hr_employee_table.sql",
+        "version": "20240801151448",
+        "up": "-- migrate:up\nCREATE SCHEMA\n    IF NOT EXISTS\n       human_resources;\n GRANT USAGE\n    ON SCHEMA human_resources\n    TO PUBLIC;\n GRANT CREATE\n    ON SCHEMA human_resources\n    TO PUBLIC;\n   SET SEARCH_PATH\n    TO 'human_resources';\n\nCREATE TABLE employee (\n       id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),\n       first_name      varchar(100) NOT NULL,\n       middle_name     varchar(100) NULL,\n       last_name       varchar(100) NOT NULL,\n       salary          numeric\n);\nINSERT INTO employee (first_name, last_name, salary)\nVALUES ('John', 'Smith', 50000),\n       ('Alice', 'Bob', 90000);\nCREATE INDEX CONCURRENTLY first_name_idx\n    ON employee(first_name);\n\n",
+        "upOptions": {
+          "transaction": "true"
+        },
+        "down": "-- migrate:down\n  DROP INDEX CONCURRENTLY first_name_idx;\n  DROP TABLE employee;\n  DROP SCHEMA human_resources;\n",
+        "downOptions": {
+          "transaction": "true"
+        }
+      },
+      "text": "Errors occurred around CREATE INDEX or DROP INDEX statement with CONCURRENTLY option happening inside a transaction block",
+      "diagnostics": [
+        {
+          "lineNumber": 24,
+          "linePosition": 1,
+          "text": "CREATE INDEX CONCURRENTLY statement is happening within a transaction block! This is prohibited",
+          "code": "IND-003",
+          "level": "FATAL"
+        },
+        {
+          "lineNumber": 28,
+          "linePosition": 3,
+          "text": "DROP INDEX CONCURRENTLY statement is happening within a transaction block! This is prohibited",
+          "code": "IND-003",
+          "level": "FATAL"
+        }
+      ],
+      "actions": []
+    }
+  ]
+}

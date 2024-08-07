@@ -1,0 +1,32 @@
+name: derisk-sql-CI
+on:
+  pull_request:
+    branches:
+    - main
+jobs:
+  derisk-sql:
+    runs-on: ubuntu-latest
+    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
+    permissions:
+        # permission to actions/checkout the contents of this PR branch
+        contents: write
+        # permission to pull the derisk-sql docker image from the GitHub Container Registry
+        packages: read
+        # permission to post comments on the PR
+        pull-requests: write
+    container:
+      image: ghcr.io/aprimetechnology/derisk-sql
+    steps:
+      - name: Checkout the contents of this repo
+        uses: actions/checkout@v4
+      - name: produce derisk-sql reports
+        run: derisk-sql check run
+      - name: process derisk-sql reports
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          # GITHUB_REPOSITORY is <owner>/<repo>, this will be just <repo>
+          GITHUB_REPOSITORY_NAME: ${{ github.event.repository.name }}
+          # GITHUB_REPOSITORY_OWNER is set here automatically
+        run: derisk-sql check ci
