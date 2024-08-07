@@ -1,0 +1,29 @@
+name: pull-request-build
+on:
+  pull_request:
+    branches:
+    - main
+jobs:
+  derisk-sql:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/golang:1.22
+    steps:
+      - name: Checkout the contents of this repo
+        uses: actions/checkout@v4
+      - name: Format
+        run : |
+            if [ -n "$(gofmt -l .)" ]; then
+                echo 'The following source files need `go fmt` to be run!!'
+                gofmt -d .
+                exit 1
+            fi
+        if: always()
+      - name: Test
+        run: |
+            go test ./...
+        if: always()
+      - name: Build
+        run: |
+            go install -buildvcs=false ./...
+        if: always()
